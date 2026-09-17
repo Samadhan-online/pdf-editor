@@ -1,0 +1,1121 @@
+<div id="pdf-pro-suite">
+  <!-- CSS & Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <style>
+    #pdf-pro-suite {
+      --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --gradient-btn: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --gradient-table: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      --gradient-pencil: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      --gradient-download: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --bg-workspace: #1e1e2f;
+      
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      width: 100%;
+      height: 90vh;
+      min-height: 700px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      position: relative;
+      background: var(--bg-workspace);
+      box-sizing: border-box;
+    }
+
+    #pdf-pro-suite * { box-sizing: border-box; }
+
+    #pdf-pro-suite .top-navbar {
+      background: var(--gradient-main);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      flex-wrap: wrap;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    #pdf-pro-suite .tool-shelf {
+      background: rgba(255, 255, 255, 0.96);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #e2e8f0;
+      z-index: 10;
+    }
+
+    #pdf-pro-suite .btn {
+      border: none;
+      padding: 6px 11px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 34px;
+      transition: all 0.2s ease;
+      color: #334155;
+      background: #f1f5f9;
+    }
+
+    #pdf-pro-suite .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      filter: brightness(1.05);
+    }
+
+    #pdf-pro-suite .btn:disabled, select:disabled, input:disabled {
+      opacity: 0.4 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+    }
+
+    #pdf-pro-suite .btn-upload { background: var(--gradient-success) !important; color: #fff !important; }
+    #pdf-pro-suite .btn-table { background: var(--gradient-table) !important; color: #fff !important; }
+    #pdf-pro-suite .btn-pencil { background: var(--gradient-pencil) !important; color: #fff !important; }
+    #pdf-pro-suite .btn-download { background: var(--gradient-download) !important; color: #fff !important; }
+    #pdf-pro-suite .btn-active { background: #8b5cf6 !important; color: #ffffff !important; }
+
+    #pdf-pro-suite .custom-select, #pdf-pro-suite input[type="color"] {
+      height: 34px;
+      border-radius: 7px;
+      border: 1px solid #cbd5e1;
+      padding: 0 8px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    #pdf-pro-suite .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    #pdf-pro-suite .file-input-wrapper input[type=file] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    #pdf-pro-suite .badge {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #pdf-pro-suite .workspace {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      background: radial-gradient(circle at top, #2d2d44 0%, #171724 100%);
+    }
+
+    #pdf-pro-suite #dropzone {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed #a855f7;
+      border-radius: 16px;
+      padding: 50px 30px;
+      text-align: center;
+      color: #fff;
+      max-width: 460px;
+      margin-top: 40px;
+      backdrop-filter: blur(12px);
+    }
+
+    #pdf-pro-suite .pdf-container {
+      position: relative;
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      border-radius: 4px;
+      display: none;
+    }
+
+    #pdf-pro-suite #bg-pdf-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    #pdf-pro-suite .textLayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      opacity: 0.25;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #pdf-pro-suite .textLayer.edit-mode-active { pointer-events: auto; cursor: text; }
+    #pdf-pro-suite .textLayer span { color: transparent; position: absolute; white-space: pre; cursor: text; }
+
+    #pdf-pro-suite .canvas-container { position: relative !important; z-index: 3; }
+
+    /* Modals */
+    #pdf-pro-suite .modal {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    #pdf-pro-suite .modal-box {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 20px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    #pdf-pro-suite #sign-pad {
+      border: 2px dashed #a855f7;
+      border-radius: 8px;
+      background: #faf5ff;
+      cursor: crosshair;
+      touch-action: none;
+      width: 100%;
+    }
+  </style>
+
+  <!-- Navbar -->
+  <div class="top-navbar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i class="fa-solid fa-file-pdf" style="font-size:22px;"></i>
+      <span style="font-weight:700; font-size:16px;">PDF Pro Studio + Pencil Table</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn pdf-tool" onclick="prevPage()" disabled><i class="fa-solid fa-angle-left"></i></button>
+      <span id="page-num-display" class="badge">0 / 0</span>
+      <button class="btn pdf-tool" onclick="nextPage()" disabled><i class="fa-solid fa-angle-right"></i></button>
+      
+      <div style="width:1px; height:18px; background:rgba(255,255,255,0.3); margin:0 4px;"></div>
+      
+      <button class="btn btn-download pdf-tool" id="download-btn" onclick="saveAndDownloadPDF()" disabled>
+        <i class="fa-solid fa-cloud-arrow-down"></i> Save & Download
+      </button>
+    </div>
+  </div>
+
+  <!-- Tools Shelf -->
+  <div class="tool-shelf">
+    <!-- Choose / Upload -->
+    <div class="file-input-wrapper">
+      <button class="btn btn-upload">
+        <i class="fa-solid fa-folder-open"></i> Upload PDF
+      </button>
+      <input type="file" id="file-input" accept="application/pdf" />
+    </div>
+
+    <!-- Table by Grid Form -->
+    <button class="btn btn-table pdf-tool" title="Grid Table" onclick="openTableModal()" disabled>
+      <i class="fa-solid fa-table"></i> Table Grid
+    </button>
+
+    <!-- Draw Table by Pencil Tool -->
+    <button class="btn btn-pencil pdf-tool" id="btn-draw-pencil-table" title="पेंसिल से टेबल ड्रॉ करें" onclick="togglePencilTableDrawMode()" disabled>
+      <i class="fa-solid fa-pencil"></i> Draw by Pencil
+    </button>
+
+    <!-- Zoom Tools -->
+    <button class="btn pdf-tool" title="Zoom Out" onclick="zoomOut()" disabled><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+    <span id="zoom-level" style="font-size:12px; font-weight:700; color:#6366f1; min-width:38px; text-align:center;">100%</span>
+    <button class="btn pdf-tool" title="Zoom In" onclick="zoomIn()" disabled><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+
+    <!-- History -->
+    <button class="btn pdf-tool" title="Undo" onclick="undo()" disabled><i class="fa-solid fa-arrow-rotate-left"></i></button>
+    <button class="btn pdf-tool" title="Redo" onclick="redo()" disabled><i class="fa-solid fa-arrow-rotate-right"></i></button>
+
+    <!-- Text Formatting -->
+    <button class="btn pdf-tool" title="Add Text" onclick="addDocumentText()" disabled><i class="fa-solid fa-font"></i> Text</button>
+    <button class="btn pdf-tool" id="btn-edit-text" title="Original Text Modify Karein" onclick="toggleEditExistingTextMode()" disabled>
+      <i class="fa-solid fa-pen-to-square"></i> Edit
+    </button>
+
+    <select id="font-family-select" class="custom-select pdf-tool" onchange="applyFontFamily(this.value)" disabled>
+      <option value="Helvetica">Helvetica</option>
+      <option value="Times-Roman">Times Roman</option>
+      <option value="Courier">Courier</option>
+    </select>
+
+    <select id="font-size-select" class="custom-select pdf-tool" onchange="applyFontSize(this.value)" disabled>
+      <option value="11">11 px</option>
+      <option value="13" selected>13 px</option>
+      <option value="16">16 px</option>
+      <option value="20">20 px</option>
+    </select>
+
+    <input type="color" id="text-color-picker" class="pdf-tool" value="#000000" onchange="applyTextColor(this.value)" disabled title="Color" />
+
+    <button class="btn pdf-tool" title="Bold" onclick="toggleBold()" disabled><i class="fa-solid fa-bold"></i></button>
+    <button class="btn pdf-tool" title="Italic" onclick="toggleItalic()" disabled><i class="fa-solid fa-italic"></i></button>
+
+    <!-- Image & Signature -->
+    <input type="file" id="image-input" accept="image/*" style="display:none;" />
+    <button class="btn pdf-tool" onclick="document.getElementById('image-input').click()" disabled><i class="fa-solid fa-image"></i> Image</button>
+    <button class="btn pdf-tool" onclick="openSignatureModal()" disabled><i class="fa-solid fa-signature"></i> Sign</button>
+    <button class="btn pdf-tool" title="Delete Active Object" onclick="deleteActiveObject()" disabled><i class="fa-solid fa-trash" style="color:#ef4444;"></i></button>
+    <button class="btn pdf-tool" title="Rotate Page" onclick="rotateCurrentPage()" disabled><i class="fa-solid fa-rotate"></i> Rotate</button>
+  </div>
+
+  <!-- Workspace -->
+  <div class="workspace" id="workspace">
+    <div id="dropzone">
+      <i class="fa-solid fa-file-circle-plus" style="font-size: 50px; color: #c084fc; margin-bottom: 16px;"></i>
+      <h3 style="margin: 0 0 8px; font-size: 19px;">अपनी PDF फ़ाइल अपलोड करें</h3>
+      <p style="margin: 0; font-size: 13px; color: #cbd5e1;">ऊपर "Upload PDF" बटन से फ़ाइल चुनें, वह तुरंत यहाँ खुलेगी।</p>
+    </div>
+
+    <div class="pdf-container" id="pdf-container">
+      <canvas id="bg-pdf-canvas"></canvas>
+      <div id="text-layer" class="textLayer"></div>
+      <canvas id="interactive-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Table Generator Modal -->
+  <div class="modal" id="tableModal">
+    <div class="modal-box">
+      <h4 style="margin:0 0 12px; color:#0891b2; font-size:16px;"><i class="fa-solid fa-table"></i> टेबल जोड़ें (Insert Table)</h4>
+      <div style="display:flex; gap:12px; margin-bottom:14px;">
+        <div style="flex:1;">
+          <label style="font-size:12px; color:#64748b; font-weight:600;">Rows (पंक्तियां):</label>
+          <input type="number" id="tbl-rows" value="3" min="1" max="15" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px;" />
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:12px; color:#64748b; font-weight:600;">Columns (कॉलम):</label>
+          <input type="number" id="tbl-cols" value="3" min="1" max="10" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px;" />
+        </div>
+      </div>
+      <div style="display:flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn" onclick="document.getElementById('tableModal').style.display='none'">Cancel</button>
+        <button class="btn btn-table" onclick="createAndInsertTable()">Insert Table</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Post Pencil Draw Partition -->
+  <div class="modal" id="pencilConfigModal">
+    <div class="modal-box">
+      <h4 style="margin:0 0 10px; color:#e11d48; font-size:16px;"><i class="fa-solid fa-pencil"></i> टेबल पार्टिशन (Partition)</h4>
+      <p style="font-size:13px; color:#64748b; margin-bottom:12px;">खींची गई टेबल बाउंड्री में कितने रो और कॉलम बनाने हैं?</p>
+      <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <div style="flex:1;">
+          <label style="font-size:12px; font-weight:600;">Rows:</label>
+          <input type="number" id="p-rows" value="3" min="1" max="15" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;" />
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:12px; font-weight:600;">Columns:</label>
+          <input type="number" id="p-cols" value="3" min="1" max="10" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;" />
+        </div>
+      </div>
+      <div style="display:flex; justify-content: flex-end; gap:8px;">
+        <button class="btn" onclick="cancelPencilTable()">Cancel</button>
+        <button class="btn btn-pencil" onclick="confirmPencilTable()">Create Grid</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signature Modal -->
+  <div class="modal" id="signatureModal">
+    <div class="modal-box">
+      <h4 style="margin:0 0 10px; color:#4c1d95; font-size:16px;">डिजिटल हस्ताक्षर बनाएं (Sign Below)</h4>
+      <canvas id="sign-pad" width="360" height="150"></canvas>
+      <div style="display:flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+        <button class="btn" onclick="clearSignPad()">Clear</button>
+        <button class="btn" onclick="closeSignatureModal()">Cancel</button>
+        <button class="btn btn-upload" onclick="insertSignature()">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var originalPdfBytes = null;
+    var pdfDoc = null;
+    var currentPageNum = 1;
+    var totalPages = 0;
+    var currentZoom = 1.0;
+    var pageRotations = {};
+    var pageOverlays = {};
+    var isEditMode = false;
+
+    // Pencil Table Draw Variables
+    var isPencilTableMode = false;
+    var pencilDrawing = false;
+    var pencilStartX = 0, pencilStartY = 0;
+    var pencilRectPreview = null;
+    var lastPencilBox = null;
+
+    var canvasHistory = [];
+    var historyStep = -1;
+    var isHistoryLocked = false;
+
+    var bgCanvas = document.getElementById('bg-pdf-canvas');
+    var bgCtx = bgCanvas.getContext('2d');
+    var textLayerDiv = document.getElementById('text-layer');
+    var fCanvas = new fabric.Canvas('interactive-canvas');
+    var BASE_DPI = 1.5;
+
+    function enableEditorTools() {
+      var tools = document.querySelectorAll('#pdf-pro-suite .pdf-tool');
+      for (var i = 0; i < tools.length; i++) {
+        tools[i].removeAttribute('disabled');
+      }
+    }
+
+    function base64ToUint8(base64) {
+      var raw = window.atob(base64);
+      var rawLength = raw.length;
+      var array = new Uint8Array(new ArrayBuffer(rawLength));
+      for (var i = 0; i < rawLength; i++) {
+        array[i] = raw.charCodeAt(i);
+      }
+      return array;
+    }
+
+    // 1. Guaranteed File Loader
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          var base64Data = evt.target.result.split(',')[1];
+          var pdfData = base64ToUint8(base64Data);
+          originalPdfBytes = pdfData;
+
+          var loadingTask = pdfjsLib.getDocument({
+            data: pdfData,
+            disableWorker: true,
+            cMapPacked: true
+          });
+
+          loadingTask.promise.then(function(doc) {
+            pdfDoc = doc;
+            totalPages = pdfDoc.numPages;
+            currentPageNum = 1;
+            currentZoom = 1.0;
+            pageRotations = {};
+            pageOverlays = {};
+            for (var i = 1; i <= totalPages; i++) pageRotations[i] = 0;
+
+            document.getElementById('dropzone').style.display = 'none';
+            document.getElementById('pdf-container').style.display = 'block';
+            document.getElementById('zoom-level').innerText = "100%";
+            enableEditorTools();
+            renderPage(currentPageNum);
+          }).catch(function(err) {
+            alert("PDF लोड करने में समस्या: " + err.message);
+          });
+        } catch (error) {
+          alert("फ़ाइल पढ़ने में असमर्थ: " + error.message);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 2. High Resolution Render Engine
+    function renderPage(pageNum) {
+      if (!pdfDoc) return;
+      document.getElementById('page-num-display').innerText = pageNum + ' / ' + totalPages;
+
+      pdfDoc.getPage(pageNum).then(function(page) {
+        var rotation = pageRotations[pageNum] || 0;
+        var baseViewport = page.getViewport({ scale: 1.0, rotation: rotation });
+        var displayWidth = baseViewport.width * currentZoom;
+        var displayHeight = baseViewport.height * currentZoom;
+
+        var renderScale = BASE_DPI * currentZoom;
+        var renderViewport = page.getViewport({ scale: renderScale, rotation: rotation });
+
+        bgCanvas.width = renderViewport.width;
+        bgCanvas.height = renderViewport.height;
+
+        var container = document.getElementById('pdf-container');
+        container.style.width = displayWidth + 'px';
+        container.style.height = displayHeight + 'px';
+
+        textLayerDiv.style.width = displayWidth + 'px';
+        textLayerDiv.style.height = displayHeight + 'px';
+        textLayerDiv.innerHTML = '';
+
+        fCanvas.setWidth(displayWidth);
+        fCanvas.setHeight(displayHeight);
+
+        page.render({ canvasContext: bgCtx, viewport: renderViewport }).promise.then(function() {
+          try {
+            return page.getTextContent();
+          } catch(e) { return null; }
+        }).then(function(textContent) {
+          if (textContent) {
+            try {
+              pdfjsLib.renderTextLayer({
+                textContent: textContent,
+                container: textLayerDiv,
+                viewport: page.getViewport({ scale: currentZoom, rotation: rotation }),
+                textDivs: []
+              });
+            } catch(err) {}
+          }
+
+          isHistoryLocked = true;
+          fCanvas.clear();
+          canvasHistory = [];
+          historyStep = -1;
+
+          if (pageOverlays[pageNum]) {
+            var rawState = JSON.parse(pageOverlays[pageNum]);
+            fCanvas.loadFromJSON(rawState, function() {
+              fCanvas.setZoom(currentZoom);
+              fCanvas.renderAll();
+              pushHistory();
+              isHistoryLocked = false;
+            });
+          } else {
+            fCanvas.setZoom(currentZoom);
+            pushHistory();
+            isHistoryLocked = false;
+          }
+        });
+      });
+    }
+
+    function cachePage() {
+      if (!currentPageNum) return;
+      var prevZoom = fCanvas.getZoom();
+      fCanvas.setZoom(1.0);
+      pageOverlays[currentPageNum] = JSON.stringify(fCanvas.toJSON());
+      fCanvas.setZoom(prevZoom);
+    }
+
+    // 3. PENCIL TABLE DRAWING ENGINE
+    function togglePencilTableDrawMode() {
+      isPencilTableMode = !isPencilTableMode;
+      var btn = document.getElementById('btn-draw-pencil-table');
+      if (isPencilTableMode) {
+        btn.classList.add('btn-active');
+        fCanvas.defaultCursor = 'crosshair';
+        fCanvas.selection = false;
+      } else {
+        btn.classList.remove('btn-active');
+        fCanvas.defaultCursor = 'default';
+        fCanvas.selection = true;
+      }
+    }
+
+    fCanvas.on('mouse:down', function(opt) {
+      if (!isPencilTableMode) return;
+      pencilDrawing = true;
+      var pointer = fCanvas.getPointer(opt.e);
+      pencilStartX = pointer.x / currentZoom;
+      pencilStartY = pointer.y / currentZoom;
+
+      pencilRectPreview = new fabric.Rect({
+        left: pencilStartX,
+        top: pencilStartY,
+        width: 1,
+        height: 1,
+        fill: 'rgba(225, 29, 72, 0.08)',
+        stroke: '#e11d48',
+        strokeWidth: 1.5,
+        strokeDashArray: [4, 4],
+        selectable: false
+      });
+      fCanvas.add(pencilRectPreview);
+    });
+
+    fCanvas.on('mouse:move', function(opt) {
+      if (!isPencilTableMode || !pencilDrawing) return;
+      var pointer = fCanvas.getPointer(opt.e);
+      var curX = pointer.x / currentZoom;
+      var curY = pointer.y / currentZoom;
+
+      var w = Math.abs(curX - pencilStartX);
+      var h = Math.abs(curY - pencilStartY);
+
+      pencilRectPreview.set({
+        left: Math.min(curX, pencilStartX),
+        top: Math.min(curY, pencilStartY),
+        width: w,
+        height: h
+      });
+      fCanvas.renderAll();
+    });
+
+    fCanvas.on('mouse:up', function(opt) {
+      if (!isPencilTableMode || !pencilDrawing) return;
+      pencilDrawing = false;
+      if (pencilRectPreview.width < 40 || pencilRectPreview.height < 30) {
+        fCanvas.remove(pencilRectPreview);
+        return;
+      }
+
+      lastPencilBox = {
+        left: pencilRectPreview.left,
+        top: pencilRectPreview.top,
+        width: pencilRectPreview.width,
+        height: pencilRectPreview.height
+      };
+
+      fCanvas.remove(pencilRectPreview);
+      togglePencilTableDrawMode(); // Exit pencil draw mode
+      document.getElementById('pencilConfigModal').style.display = 'flex';
+    });
+
+    function cancelPencilTable() {
+      document.getElementById('pencilConfigModal').style.display = 'none';
+      lastPencilBox = null;
+    }
+
+    function confirmPencilTable() {
+      document.getElementById('pencilConfigModal').style.display = 'none';
+      if (!lastPencilBox) return;
+
+      var rows = parseInt(document.getElementById('p-rows').value) || 3;
+      var cols = parseInt(document.getElementById('p-cols').value) || 3;
+
+      var cellWidth = lastPencilBox.width / cols;
+      var cellHeight = lastPencilBox.height / rows;
+
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var x = lastPencilBox.left + (c * cellWidth);
+          var y = lastPencilBox.top + (r * cellHeight);
+
+          var cellRect = new fabric.Rect({
+            left: x,
+            top: y,
+            width: cellWidth,
+            height: cellHeight,
+            fill: (r === 0) ? '#f8fafc' : '#ffffff',
+            stroke: '#475569',
+            strokeWidth: 1,
+            selectable: false
+          });
+
+          var cellText = new fabric.IText((r === 0 ? 'Header' : 'Data'), {
+            left: x + 4,
+            top: y + 6,
+            fontSize: Math.max(9, Math.round(cellHeight * 0.35)),
+            fontFamily: 'Helvetica',
+            fill: '#0f172a',
+            editable: true
+          });
+
+          fCanvas.add(cellRect);
+          fCanvas.add(cellText);
+        }
+      }
+
+      fCanvas.renderAll();
+      pushHistory();
+      lastPencilBox = null;
+    }
+
+    // 4. Modal Table Generator (Standard Grid)
+    function openTableModal() {
+      document.getElementById('tableModal').style.display = 'flex';
+    }
+
+    function createAndInsertTable() {
+      var rows = parseInt(document.getElementById('tbl-rows').value) || 3;
+      var cols = parseInt(document.getElementById('tbl-cols').value) || 3;
+      document.getElementById('tableModal').style.display = 'none';
+
+      var cellWidth = 90;
+      var cellHeight = 32;
+      var startX = 60 / currentZoom;
+      var startY = 60 / currentZoom;
+
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var x = startX + (c * cellWidth);
+          var y = startY + (r * cellHeight);
+
+          var cellRect = new fabric.Rect({
+            left: x,
+            top: y,
+            width: cellWidth,
+            height: cellHeight,
+            fill: (r === 0) ? '#f1f5f9' : '#ffffff',
+            stroke: '#64748b',
+            strokeWidth: 1,
+            selectable: false
+          });
+
+          var cellText = new fabric.IText((r === 0 ? 'Head ' + (c + 1) : 'Cell'), {
+            left: x + 6,
+            top: y + 8,
+            fontSize: 12,
+            fontFamily: 'Helvetica',
+            fill: '#0f172a',
+            editable: true
+          });
+
+          fCanvas.add(cellRect);
+          fCanvas.add(cellText);
+        }
+      }
+
+      fCanvas.renderAll();
+      pushHistory();
+    }
+
+    // 5. Zoom Controls
+    function zoomIn() {
+      if (currentZoom >= 2.2) return;
+      cachePage();
+      currentZoom = parseFloat((currentZoom + 0.15).toFixed(2));
+      document.getElementById('zoom-level').innerText = Math.round(currentZoom * 100) + '%';
+      renderPage(currentPageNum);
+    }
+
+    function zoomOut() {
+      if (currentZoom <= 0.6) return;
+      cachePage();
+      currentZoom = parseFloat((currentZoom - 0.15).toFixed(2));
+      document.getElementById('zoom-level').innerText = Math.round(currentZoom * 100) + '%';
+      renderPage(currentPageNum);
+    }
+
+    // 6. Navigation & Rotation
+    function prevPage() {
+      if (currentPageNum <= 1) return;
+      cachePage();
+      currentPageNum--;
+      renderPage(currentPageNum);
+    }
+
+    function nextPage() {
+      if (currentPageNum >= totalPages) return;
+      cachePage();
+      currentPageNum++;
+      renderPage(currentPageNum);
+    }
+
+    function rotateCurrentPage() {
+      if (!pdfDoc) return;
+      pageRotations[currentPageNum] = ((pageRotations[currentPageNum] || 0) + 90) % 360;
+      renderPage(currentPageNum);
+    }
+
+    // 7. Undo / Redo
+    function pushHistory() {
+      if (isHistoryLocked) return;
+      var state = JSON.stringify(fCanvas.toJSON());
+      canvasHistory = canvasHistory.slice(0, historyStep + 1);
+      canvasHistory.push(state);
+      historyStep++;
+    }
+
+    fCanvas.on('object:added', function() { pushHistory(); });
+    fCanvas.on('object:modified', function() { pushHistory(); });
+    fCanvas.on('object:removed', function() { pushHistory(); });
+
+    function undo() {
+      if (historyStep > 0) {
+        isHistoryLocked = true;
+        historyStep--;
+        fCanvas.loadFromJSON(canvasHistory[historyStep], function() {
+          fCanvas.setZoom(currentZoom);
+          fCanvas.renderAll();
+          isHistoryLocked = false;
+        });
+      }
+    }
+
+    function redo() {
+      if (historyStep < canvasHistory.length - 1) {
+        isHistoryLocked = true;
+        historyStep++;
+        fCanvas.loadFromJSON(canvasHistory[historyStep], function() {
+          fCanvas.setZoom(currentZoom);
+          fCanvas.renderAll();
+          isHistoryLocked = false;
+        });
+      }
+    }
+
+    // 8. Typography Tools
+    function applyFontFamily(font) {
+      var obj = fCanvas.getActiveObject();
+      if (obj && (obj.type === 'i-text' || obj.type === 'text')) {
+        obj.set('fontFamily', font);
+        fCanvas.renderAll();
+        pushHistory();
+      }
+    }
+
+    function applyFontSize(size) {
+      var obj = fCanvas.getActiveObject();
+      if (obj && (obj.type === 'i-text' || obj.type === 'text')) {
+        obj.set('fontSize', parseInt(size));
+        fCanvas.renderAll();
+        pushHistory();
+      }
+    }
+
+    function applyTextColor(color) {
+      var obj = fCanvas.getActiveObject();
+      if (obj && (obj.type === 'i-text' || obj.type === 'text')) {
+        obj.set('fill', color);
+        fCanvas.renderAll();
+        pushHistory();
+      }
+    }
+
+    function toggleBold() {
+      var obj = fCanvas.getActiveObject();
+      if (obj && obj.type === 'i-text') {
+        obj.set('fontWeight', obj.fontWeight === 'bold' ? 'normal' : 'bold');
+        fCanvas.renderAll();
+        pushHistory();
+      }
+    }
+
+    function toggleItalic() {
+      var obj = fCanvas.getActiveObject();
+      if (obj && obj.type === 'i-text') {
+        obj.set('fontStyle', obj.fontStyle === 'italic' ? 'normal' : 'italic');
+        fCanvas.renderAll();
+        pushHistory();
+      }
+    }
+
+    function addDocumentText() {
+      var font = document.getElementById('font-family-select').value;
+      var size = parseInt(document.getElementById('font-size-select').value);
+      var color = document.getElementById('text-color-picker').value;
+
+      var text = new fabric.IText('यहाँ लिखें...', {
+        left: 50 / currentZoom,
+        top: 50 / currentZoom,
+        fontFamily: font,
+        fill: color,
+        fontSize: size,
+        editable: true
+      });
+
+      fCanvas.add(text);
+      fCanvas.setActiveObject(text);
+    }
+
+    function toggleEditExistingTextMode() {
+      isEditMode = !isEditMode;
+      var btn = document.getElementById('btn-edit-text');
+
+      if (isEditMode) {
+        btn.classList.add('btn-active');
+        textLayerDiv.classList.add('edit-mode-active');
+        document.querySelector('#pdf-pro-suite .canvas-container').style.pointerEvents = 'none';
+      } else {
+        btn.classList.remove('btn-active');
+        textLayerDiv.classList.remove('edit-mode-active');
+        document.querySelector('#pdf-pro-suite .canvas-container').style.pointerEvents = 'auto';
+      }
+    }
+
+    textLayerDiv.addEventListener('click', function(e) {
+      if (!isEditMode) return;
+      var target = e.target;
+      if (target.tagName === 'SPAN' && target.innerText.trim().length > 0) {
+        var textToEdit = target.innerText;
+        var rect = target.getBoundingClientRect();
+        var containerRect = document.getElementById('pdf-container').getBoundingClientRect();
+
+        var left = (rect.left - containerRect.left) / currentZoom;
+        var top = (rect.top - containerRect.top) / currentZoom;
+        var width = rect.width / currentZoom;
+        var height = rect.height / currentZoom;
+
+        var computedStyle = window.getComputedStyle(target);
+        var matchedFontSize = Math.round(parseFloat(computedStyle.fontSize) / currentZoom) || 14;
+
+        var whiteout = new fabric.Rect({
+          left: left - 1,
+          top: top - 1,
+          width: width + 3,
+          height: height + 2,
+          fill: '#ffffff',
+          selectable: false,
+          evented: false
+        });
+
+        var editableText = new fabric.IText(textToEdit, {
+          left: left,
+          top: top,
+          fontFamily: document.getElementById('font-family-select').value,
+          fill: document.getElementById('text-color-picker').value,
+          fontSize: matchedFontSize,
+          editable: true
+        });
+
+        fCanvas.add(whiteout);
+        fCanvas.add(editableText);
+        fCanvas.setActiveObject(editableText);
+
+        toggleEditExistingTextMode();
+        editableText.enterEditing();
+        editableText.selectAll();
+      }
+    });
+
+    // 9. Image Upload
+    document.getElementById('image-input').addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(f) {
+        fabric.Image.fromURL(f.target.result, function(img) {
+          img.scaleToWidth(180 / currentZoom);
+          img.set({
+            cornerColor: '#8b5cf6',
+            cornerSize: 9,
+            transparentCorners: false
+          });
+          fCanvas.add(img);
+          fCanvas.centerObject(img);
+          fCanvas.setActiveObject(img);
+        });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
+
+    function deleteActiveObject() {
+      var obj = fCanvas.getActiveObject();
+      if (obj) {
+        fCanvas.remove(obj);
+        pushHistory();
+      }
+    }
+
+    // 10. Signature Pad
+    var signModal = document.getElementById('signatureModal');
+    var signCanvas = document.getElementById('sign-pad');
+    var signCtx = signCanvas.getContext('2d');
+    var isDrawing = false;
+
+    function openSignatureModal() {
+      signModal.style.display = 'flex';
+      clearSignPad();
+    }
+    function closeSignatureModal() {
+      signModal.style.display = 'none';
+    }
+    function clearSignPad() {
+      signCtx.clearRect(0, 0, signCanvas.width, signCanvas.height);
+    }
+
+    function getCanvasCoordinates(event) {
+      var rect = signCanvas.getBoundingClientRect();
+      var clientX = event.touches ? event.touches[0].clientX : event.clientX;
+      var clientY = event.touches ? event.touches[0].clientY : event.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startSign(e) {
+      e.preventDefault();
+      isDrawing = true;
+      var pos = getCanvasCoordinates(e);
+      signCtx.beginPath();
+      signCtx.moveTo(pos.x, pos.y);
+      signCtx.strokeStyle = document.getElementById('text-color-picker').value || '#000000';
+      signCtx.lineWidth = 2.5;
+      signCtx.lineCap = 'round';
+      signCtx.lineJoin = 'round';
+    }
+
+    function moveSign(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      var pos = getCanvasCoordinates(e);
+      signCtx.lineTo(pos.x, pos.y);
+      signCtx.stroke();
+    }
+
+    function stopSign() { isDrawing = false; }
+
+    signCanvas.addEventListener('mousedown', startSign);
+    signCanvas.addEventListener('mousemove', moveSign);
+    window.addEventListener('mouseup', stopSign);
+
+    signCanvas.addEventListener('touchstart', startSign, { passive: false });
+    signCanvas.addEventListener('touchmove', moveSign, { passive: false });
+    window.addEventListener('touchend', stopSign);
+
+    function insertSignature() {
+      var dataURL = signCanvas.toDataURL('image/png');
+      fabric.Image.fromURL(dataURL, function(img) {
+        img.scaleToWidth(140 / currentZoom);
+        img.set({
+          left: 100 / currentZoom,
+          top: 100 / currentZoom,
+          cornerColor: '#8b5cf6',
+          cornerSize: 8
+        });
+        fCanvas.add(img);
+        fCanvas.setActiveObject(img);
+        closeSignatureModal();
+      });
+    }
+
+    function hexToRgb(hex) {
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+      } : { r: 0, g: 0, b: 0 };
+    }
+
+    // 11. PDF Export Engine (With Full Table Preservation)
+    async function saveAndDownloadPDF() {
+      if (!originalPdfBytes) return;
+
+      var btn = document.getElementById('download-btn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+      btn.disabled = true;
+
+      try {
+        cachePage();
+        var pdfDocLib = await PDFLib.PDFDocument.load(originalPdfBytes);
+
+        var fonts = {
+          'Helvetica': await pdfDocLib.embedFont(PDFLib.StandardFonts.Helvetica),
+          'Helvetica-Bold': await pdfDocLib.embedFont(PDFLib.StandardFonts.HelveticaBold),
+          'Helvetica-Oblique': await pdfDocLib.embedFont(PDFLib.StandardFonts.HelveticaOblique),
+          'Times-Roman': await pdfDocLib.embedFont(PDFLib.StandardFonts.TimesRoman),
+          'Times-Roman-Bold': await pdfDocLib.embedFont(PDFLib.StandardFonts.TimesRomanBold),
+          'Times-Roman-Italic': await pdfDocLib.embedFont(PDFLib.StandardFonts.TimesRomanItalic),
+          'Courier': await pdfDocLib.embedFont(PDFLib.StandardFonts.Courier),
+          'Courier-Bold': await pdfDocLib.embedFont(PDFLib.StandardFonts.CourierBold),
+          'Courier-Oblique': await pdfDocLib.embedFont(PDFLib.StandardFonts.CourierOblique)
+        };
+
+        for (var i = 1; i <= totalPages; i++) {
+          var page = pdfDocLib.getPage(i - 1);
+
+          if (pageRotations[i]) {
+            var baseAngle = page.getRotation().angle;
+            page.setRotation(PDFLib.degrees((baseAngle + pageRotations[i]) % 360));
+          }
+
+          if (pageOverlays[i]) {
+            var overlayData = JSON.parse(pageOverlays[i]);
+            var pageSize = page.getSize();
+            var width = pageSize.width;
+            var height = pageSize.height;
+
+            var scaleRatioX = width / (fCanvas.width / currentZoom);
+            var scaleRatioY = height / (fCanvas.height / currentZoom);
+
+            for (var j = 0; j < overlayData.objects.length; j++) {
+              var item = overlayData.objects[j];
+              var x = item.left * scaleRatioX;
+              var y = height - (item.top * scaleRatioY);
+
+              // Render Table Rectangles (Borders & Cells)
+              if (item.type === 'rect') {
+                var fillRgb = hexToRgb(item.fill || '#ffffff');
+                var strokeRgb = hexToRgb(item.stroke || '#64748b');
+                
+                page.drawRectangle({
+                  x: x,
+                  y: y - (item.height * scaleRatioY),
+                  width: item.width * scaleRatioX,
+                  height: item.height * scaleRatioY,
+                  color: PDFLib.rgb(fillRgb.r, fillRgb.g, fillRgb.b),
+                  borderColor: item.stroke ? PDFLib.rgb(strokeRgb.r, strokeRgb.g, strokeRgb.b) : undefined,
+                  borderWidth: item.strokeWidth ? item.strokeWidth : 0
+                });
+              } 
+              // Render Table Text Cells / Text
+              else if (item.type === 'i-text' || item.type === 'text') {
+                var fontKey = item.fontFamily && fonts[item.fontFamily] ? item.fontFamily : 'Helvetica';
+                if (item.fontWeight === 'bold') fontKey += '-Bold';
+                else if (item.fontStyle === 'italic') fontKey += (fontKey.indexOf('Times') === 0 ? '-Italic' : '-Oblique');
+
+                var chosenFont = fonts[fontKey] || fonts['Helvetica'];
+                var rgb = hexToRgb(item.fill || '#000000');
+
+                page.drawText(item.text, {
+                  x: x,
+                  y: y - (item.fontSize * scaleRatioY),
+                  size: item.fontSize * scaleRatioY,
+                  font: chosenFont,
+                  color: PDFLib.rgb(rgb.r, rgb.g, rgb.b),
+                  opacity: item.opacity !== undefined ? item.opacity : 1
+                });
+              } 
+              // Render Images and Signatures
+              else if (item.type === 'image' && item.src) {
+                var imageBytes = base64ToUint8(item.src.split(',')[1]);
+                var embeddedImg;
+
+                if (item.src.indexOf('data:image/jpeg') === 0 || item.src.indexOf('data:image/jpg') === 0) {
+                  embeddedImg = await pdfDocLib.embedJpg(imageBytes);
+                } else {
+                  embeddedImg = await pdfDocLib.embedPng(imageBytes);
+                }
+
+                var imgWidth = (item.width * item.scaleX) * scaleRatioX;
+                var imgHeight = (item.height * item.scaleY) * scaleRatioY;
+
+                page.drawImage(embeddedImg, {
+                  x: x,
+                  y: y - imgHeight,
+                  width: imgWidth,
+                  height: imgHeight,
+                  opacity: item.opacity !== undefined ? item.opacity : 1
+                });
+              }
+            }
+          }
+        }
+
+        var pdfBytes = await pdfDocLib.save();
+        var blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'edited_document.pdf';
+        link.click();
+        URL.revokeObjectURL(link.href);
+      } catch (err) {
+        alert("डाउनलोड करने में त्रुटि: " + err.message);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Save & Download';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</div>
